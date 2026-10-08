@@ -1,0 +1,179 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover">
+<link rel="stylesheet" href="style.css">
+</head><body>
+<title>Computer Adventure</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+
+<div id="app">
+  <canvas id="c" tabindex="0" aria-label="Laboratorium komputer 3D"></canvas>
+
+  <div id="hud" hidden>
+    <div class="topbar">
+      <div class="stats" aria-label="Status pemain">
+        <div class="pill card" id="lvl-pill"><span class="pl">🎮 LEVEL</span><b id="lvl">1</b></div>
+        <div class="pill card" id="xp-pill"><span class="pl">XP</span><b id="xp">0</b></div>
+        <div class="pill card" id="star-pill"><span class="pl">⭐ STARS</span><b id="stars">0</b></div>
+        <button class="pill card pbtn" id="badge-pill" type="button" aria-label="Lihat badge dan level"><span class="pl">🏆 BADGE</span><b id="nbadge">0</b></button>
+      </div>
+      <div class="mission card">
+        <div class="m-label" id="m-label">MISI SAAT INI</div>
+        <div class="m-text" id="m-text"></div>
+        <ul class="objs" id="objs"></ul>
+        <div class="m-cap" id="m-cap"></div>
+      </div>
+      <button class="icon-btn" id="snd" type="button" aria-label="Suara hidup atau mati" aria-pressed="true">🔊</button>
+      <button class="icon-btn" id="voice" type="button" aria-label="Suara KOMP-BOT hidup atau mati" aria-pressed="true" style="margin-left:0">🗣️</button>
+      <button class="icon-btn" id="voice2" type="button" aria-label="Ganti suara KOMP-BOT" style="margin-left:0">🎙️</button>
+      <button class="icon-btn" id="restart" type="button" aria-label="Mulai ulang permainan" style="margin-left:0" hidden>🔄</button>
+    </div>
+    <div id="goal" class="card" aria-live="polite"><span id="g-ic">🔍</span><div><div id="g-tx"></div><div id="g-pips"></div></div></div>
+    <div id="guide" hidden aria-hidden="true"><div class="ar" id="g-ar"><svg viewBox="0 0 64 64" width="66" height="66"><circle cx="32" cy="32" r="29" fill="#FF6F59" stroke="#1B2559" stroke-width="4"/><path d="M32 11 L49 38 L37 38 L37 53 L27 53 L27 38 L15 38 Z" fill="#fff" stroke="#1B2559" stroke-width="2" stroke-linejoin="round"/></svg></div><small id="g-d"></small></div>
+    <div id="areabanner" class="card" hidden></div>
+    <div id="fade"></div>
+    <div id="final" hidden role="dialog" aria-labelledby="f-title">
+      <div class="f-card card">
+        <div class="f-trophy" aria-hidden="true">🏆</div>
+        <h2 id="f-title">Semua misi selesai!</h2>
+        <p class="c-q">Kamu hebat! Kamu sudah jadi Junior Computer Engineer.</p>
+        <div class="f-sum"><span id="f-xp"></span><span id="f-st"></span><span id="f-bd"></span></div>
+        <button class="f-btn" id="f-again" type="button">🔄 Mulai Ulang</button>
+        <button class="f-btn" id="f-stay" type="button">Lihat lab dulu</button>
+      </div>
+    </div>
+
+    <div id="bot-dialog" aria-live="polite">
+      <div class="bot-av" aria-hidden="true">
+        <svg viewBox="0 0 64 64" width="52" height="52"><line x1="32" y1="6" x2="32" y2="15" stroke="#1B2559" stroke-width="3" stroke-linecap="round"/><circle cx="32" cy="6" r="4" fill="#FFC83D" stroke="#1B2559" stroke-width="2"/><rect x="8" y="15" width="48" height="38" rx="16" fill="#F4F8FF" stroke="#1B2559" stroke-width="3"/><rect x="14" y="23" width="36" height="20" rx="10" fill="#1B2559"/><rect x="21" y="28" width="7" height="9" rx="3" fill="#5EEAFF"/><rect x="36" y="28" width="7" height="9" rx="3" fill="#5EEAFF"/><rect x="2" y="28" width="6" height="12" rx="3" fill="#3B82F6" stroke="#1B2559" stroke-width="2"/><rect x="56" y="28" width="6" height="12" rx="3" fill="#3B82F6" stroke="#1B2559" stroke-width="2"/></svg>
+      </div>
+      <div class="bot-bubble card">
+        <div class="bot-name">KOMP-BOT</div>
+        <p id="bot-text"></p>
+      </div>
+    </div>
+
+    <div id="inv" aria-label="Tas">
+      <div class="inv-t">TAS <span id="inv-n">0/3</span></div>
+      <button class="slot sel" data-i="0" type="button" aria-label="Slot tas 1"><span class="sn">1</span><span class="si"></span><span class="sl"></span></button>
+      <button class="slot" data-i="1" type="button" aria-label="Slot tas 2"><span class="sn">2</span><span class="si"></span><span class="sl"></span></button>
+      <button class="slot" data-i="2" type="button" aria-label="Slot tas 3"><span class="sn">3</span><span class="si"></span><span class="sl"></span></button>
+      <button id="drop-btn" type="button" hidden><kbd>Q</kbd> Drop</button>
+    </div>
+
+    <div id="prompt" class="card" hidden>
+      <kbd>E</kbd>
+      <div><div class="pr-main" id="pr-main">Interact</div><div class="pr-sub" id="pr-sub"></div></div>
+    </div>
+    <div id="foot">E - Interact</div>
+
+    <div id="help" class="card">
+      <div><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> untuk bergerak</div>
+      <div>Mouse untuk melihat</div>
+      <div><kbd>E</kbd> untuk berinteraksi</div>
+      <div><kbd>B</kbd> untuk badge dan level</div>
+      <div><kbd>Q</kbd> letakkan benda, <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> pilih slot tas</div>
+      <small>Klik layar lalu gerakkan mouse. Atau tahan klik kiri dan geser.</small>
+    </div>
+
+    <div id="touch">
+      <div id="joy" aria-label="Joystick"><i id="joy-knob"></i></div>
+      <button id="ebtn" type="button" aria-label="Interact">E</button>
+    </div>
+  </div>
+
+  <div id="panel" hidden role="dialog" aria-labelledby="p-name">
+    <div class="p-card card">
+      <span class="p-tag" id="p-tag"></span>
+      <h2 id="p-name"></h2>
+      <p id="p-desc"></p>
+      <div class="p-fact"><b>Tahukah kamu?</b> <span id="p-fact"></span></div>
+      <div class="p-new" id="p-new" hidden></div>
+      <button id="p-close" type="button"><kbd>E</kbd> Tutup</button>
+    </div>
+  </div>
+
+  <div id="prog" hidden role="dialog" aria-labelledby="prog-h">
+    <div class="g-card card">
+      <h2 id="prog-h">Kemajuan Misi</h2>
+      <div class="g-sec">LEVEL</div>
+      <ol class="plist" id="prog-levels"></ol>
+      <div class="g-sec">BADGE</div>
+      <ul class="plist" id="prog-badges"></ul>
+      <button id="prog-close" type="button"><kbd>B</kbd> Tutup</button>
+    </div>
+  </div>
+
+  <div id="port" hidden role="dialog" aria-labelledby="port-h">
+    <div class="g-card card">
+      <h2 id="port-h">Port Belakang CPU</h2>
+      <p class="port-sub" id="port-sub"></p>
+      <div class="ports" id="ports"></div>
+      <div class="port-msg" id="port-msg" aria-live="polite"></div>
+      <button id="port-close" type="button"><kbd>E</kbd> Batal</button>
+    </div>
+  </div>
+
+  <div id="choice" hidden role="dialog" aria-labelledby="choice-h">
+    <div class="c-card card">
+      <span class="p-tag" id="choice-tag">SITUASI</span>
+      <h2 id="choice-h"></h2>
+      <p class="c-q" id="choice-q"></p>
+      <div id="choice-opts"></div>
+      <div class="c-msg" id="choice-msg" aria-live="polite"></div>
+      <button id="choice-close" type="button"><kbd>E</kbd> Nanti dulu</button>
+    </div>
+  </div>
+  <div id="algo" hidden role="dialog" aria-labelledby="a-title">
+    <div class="a-card card">
+      <div class="a-head"><span class="p-tag" id="a-title">PUZZLE 1/3</span><span id="a-goal"></span></div>
+      <div class="a-def"><b>Algoritma</b> = urutan langkah. Pilih blok, lalu tekan ▶ RUN!</div>
+      <div class="a-pal" id="a-pal">
+        <button type="button" class="ablk" data-c="F">↑ FORWARD</button>
+        <button type="button" class="ablk" data-c="L">← LEFT</button>
+        <button type="button" class="ablk" data-c="R">→ RIGHT</button>
+        <button type="button" class="ablk" data-c="B">↓ BACK</button>
+      </div>
+      <div class="a-prog" id="a-prog"></div>
+      <div class="a-msg" id="a-msg" aria-live="polite"></div>
+      <div class="a-btns">
+        <button type="button" class="ablk" id="a-run">▶ RUN</button>
+        <button type="button" class="ablk" id="a-undo">Hapus</button>
+        <button type="button" class="ablk" id="a-clear">Ulang</button>
+        <button type="button" class="ablk" id="a-close"><kbd>E</kbd> Tutup</button>
+      </div>
+    </div>
+  </div>
+  <div id="redflash"></div>
+
+  <div id="fx"></div>
+  <div id="toast" hidden></div>
+
+  <div id="menu">
+    <div class="m-card card">
+      <div class="m-kick">MISI DI LABORATORIUM KOMPUTER</div>
+      <h1 class="m-title">COMPUTER<span>ADVENTURE</span></h1>
+      <p class="m-sub">Jelajahi lab sekolah, kenali perangkat komputer, dan bantu KOMP-BOT menyalakan semuanya!</p>
+      <div class="m-h">PILIH KARAKTER</div>
+      <div class="chars" role="group" aria-label="Pilih karakter">
+        <button class="char" id="ch-boy" type="button" aria-pressed="true">
+          <svg viewBox="0 0 64 64" aria-hidden="true"><rect x="14" y="40" width="36" height="22" rx="10" fill="#14B8A6" stroke="#1B2559" stroke-width="3"/><circle cx="32" cy="26" r="16" fill="#FFD3AE" stroke="#1B2559" stroke-width="3"/><path d="M15 25c0-12 9-17 17-17s17 5 17 17c-6-3-10-9-12-11-4 5-12 9-22 11z" fill="#2B1A10" stroke="#1B2559" stroke-width="2.5" stroke-linejoin="round"/><circle cx="26" cy="29" r="2.5" fill="#1B2559"/><circle cx="38" cy="29" r="2.5" fill="#1B2559"/><path d="M27 35q5 4 10 0" fill="none" stroke="#1B2559" stroke-width="2.5" stroke-linecap="round"/></svg>
+          Anak Laki-laki
+        </button>
+        <button class="char" id="ch-girl" type="button" aria-pressed="false">
+          <svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="9" cy="33" r="7" fill="#4B2E1B" stroke="#1B2559" stroke-width="2.5"/><circle cx="55" cy="33" r="7" fill="#4B2E1B" stroke="#1B2559" stroke-width="2.5"/><rect x="14" y="40" width="36" height="22" rx="10" fill="#FF6F9C" stroke="#1B2559" stroke-width="3"/><circle cx="32" cy="26" r="16" fill="#FFD3AE" stroke="#1B2559" stroke-width="3"/><path d="M15 26c0-12 9-18 17-18s17 6 17 18c-5-2-10-8-12-12-4 5-12 9-22 12z" fill="#4B2E1B" stroke="#1B2559" stroke-width="2.5" stroke-linejoin="round"/><circle cx="26" cy="29" r="2.5" fill="#1B2559"/><circle cx="38" cy="29" r="2.5" fill="#1B2559"/><path d="M27 35q5 4 10 0" fill="none" stroke="#1B2559" stroke-width="2.5" stroke-linecap="round"/></svg>
+          Anak Perempuan
+        </button>
+      </div>
+      <button id="start" type="button">MULAI MISI</button>
+      <div class="m-keys"><span><kbd>WASD</kbd> bergerak</span><span>Mouse melihat</span><span><kbd>E</kbd> berinteraksi</span></div>
+      <span class="m-stage">TAHAP 10 · LEVEL 8: MISI BESAR</span>
+    </div>
+  </div>
+
+  <div id="nogl" hidden><div class="card">Game 3D tidak bisa dijalankan di browser ini. Coba buka dengan Chrome, Edge, atau Firefox versi terbaru.</div></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="script.js"></script>
+</body></html>
